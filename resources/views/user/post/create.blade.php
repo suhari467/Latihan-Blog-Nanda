@@ -37,8 +37,9 @@
       </div>
       <div class="mb-3">
         <label for="body" class="form-label">Isi Postingan</label>
-        <input type="hidden" class="form-control @error('body') is-invalid @enderror" id="body" name="body" value="{{ old('body') }}">
-        <trix-editor input="body"></trix-editor>
+        {{-- <input type="hidden" class="form-control @error('body') is-invalid @enderror" id="body" name="body" value="{{ old('body') }}">
+        <trix-editor input="body"></trix-editor> --}}
+        <textarea class="form-control" name="body" id="body">{!! old('body') !!}</textarea>
         @error('body')
         <div class="invalid-feedback">
           {{ $message }}
@@ -88,5 +89,39 @@
           imagePreview.src = oFEvent.target.result;
         }
       }
+    </script>
+    <script>
+      let editorInstance;
+
+        ClassicEditor
+            .create(document.querySelector('#body'), {
+                toolbar: [
+                    'heading', '|',
+                    'bold', 'italic', 'link', 'insertTable',
+                    'bulletedList', 'numberedList', 'undo', 'redo'
+                ],
+                table: {
+                    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells'],
+                }
+            })
+            .then(editor => {
+                editorInstance = editor;
+            })
+            .catch(error => console.error(error));
+
+        // sebelum form submit, modifikasi HTML
+        document.querySelector('#tambahContent').addEventListener('submit', e => {
+            // ambil data mentah dari editor
+            let data = editorInstance.getData();
+
+            // tambahkan class ke setiap <table>
+            data = data.replace(
+                /<table(\s|>)/g,
+                '<table class="table table-bordered"$1'
+            );
+
+            // tulis kembali hasilnya ke textarea supaya yang terkirim sudah ter‐update
+            document.querySelector('#body').value = data;
+        });
     </script>
 @endsection
